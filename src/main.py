@@ -4,16 +4,15 @@
 import logging
 #import sqlite3
 import sys
-from typing import Annotated
 
 # External imports
 import uvicorn
-from fastapi import FastAPI, Cookie
+from fastapi import FastAPI, Request
+from fastapi.responses import RedirectResponse, HTMLResponse
 
 # Local imports
 import at_state
 import at_config
-from at_cookie import ATCookies
 
 
 logger = logging.getLogger(__name__)
@@ -21,11 +20,22 @@ logger = logging.getLogger(__name__)
 app = FastAPI()
 main_state = at_state.ATMainState()
 
-@app.get("/")
-async def main_page(cookies: Annotated[ATCookies, Cookie()]):
+
+# Check that the user is authenticated:
+@app.middleware("http")
+async def check_session(request: Request, call_next):
+    if main_state.check_session(request.cookies):
+        response = await call_next(request)
+        return response
+    else:
+        response = RedirectResponse(url="/login")
+        return response
+
+@app.get("/", response_class=HTMLResponse)
+async def main_page():
     return ""
 
-@app.get("/login")
+@app.get("/login", response_class=HTMLResponse)
 async def login():
     return ""
 

@@ -4,6 +4,7 @@ import sqlite3
 
 # External imports
 
+
 # Local imports
 import at_config
 
@@ -18,6 +19,7 @@ class ATMainState:
     def activate(self):
         self.db = sqlite3.connect(self.configuration.db_filename)
 
-
+    def check_session(self, cookies: dict[str, str]) -> bool:
+        return False
 
 
