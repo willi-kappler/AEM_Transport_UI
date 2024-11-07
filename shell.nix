@@ -6,6 +6,7 @@
         fastapi
         flake8
         ipython
+        jinja2
         mypy
         uvicorn
         pydantic
