@@ -1,5 +1,14 @@
 # TODO:
 
 https://fastapi.tiangolo.com/bn/advanced/templates/
+https://jinja.palletsprojects.com/en/stable/templates/
 
+
+
+
+
+# SQLite3 tables:
+
+CREATE TABLE sessions(id INTEGER PRIMARY KEY, uuid TEXT NOT NULL, ip_hash TEXT NOT NULL, user_id INTEGER);
+CREATE TABLE users(id INTEGER PRIMARY KEY, login TEXT NOT NULL, password TEXT NOT NULL);
 
