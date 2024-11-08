@@ -4,6 +4,7 @@
 import logging
 #import sqlite3
 import sys
+from typing import Optional
 
 # External imports
 import uvicorn
@@ -25,24 +26,32 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 main_state = at_state.ATMainState()
 
-# Check that the user is authenticated:
-@app.middleware("http")
-async def check_session(request: Request, call_next):
-    if main_state.check_session(request.cookies, request.client):
-        response = await call_next(request)
-        return response
+@app.get("/")
+async def main_page(request: Request):
+    maybe_user: Optional[str] = main_state.get_current_user(request)
+
+    match maybe_user:
+        case None:
+            return RedirectResponse(url="/login")
+        case username:
+            return templates.TemplateResponse(name="start.html", context={"username": username})
+
+@app.get("/login")
+async def login_get(request: Request):
+    maybe_user: Optional[str] = main_state.get_current_user(request)
+
+    match maybe_user:
+        case None:
+            return templates.TemplateResponse(name="login.html")
+        case username:
+            return RedirectResponse(url="/")
+
+@app.post("/login")
+async def login_post(username: str, password: str):
+    if main_state.create_new_session(username, password):
+        return RedirectResponse(url="/")
     else:
-        response = RedirectResponse(url="/login")
-        return response
-
-@app.get("/", response_class=HTMLResponse)
-async def main_page():
-    user_name = main_state.get_current_user()
-    return templates.TemplateResponse(name="start.html", context={"user_name": user_name})
-
-@app.get("/login", response_class=HTMLResponse)
-async def login():
-    return templates.TemplateResponse(name="login.html")
+        return templates.TemplateResponse(name="login.html", context={"failed_login": True})
 
 if __name__ == "__main__":
     log_format = "%(asctime)s - %(levelname)s - %(name)s - %(message)s"
