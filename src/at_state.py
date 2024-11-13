@@ -31,13 +31,14 @@ class ATMainState:
         cookies: dict[str, str] = request.cookies
 
         if "session_id" not in cookies:
-            logger.debug(f"No session_id found in cookies.")
+            logger.debug("No session_id found in cookies.")
             return None
 
         session_id: str = cookies["session_id"]
 
         try:
             uuid_object = uuid.UUID(session_id, version=4)
+            del uuid_object
         except Exception:
             logging.debug(f"Invalid session id (uuid version 4): {session_id}")
             return None
@@ -82,7 +83,7 @@ class ATMainState:
         # TODO: use better method with salting!!!!
         hashed_password = blake2b(password.encode()).hexdigest()
         if hashed_password != stored_password:
-            logger.debug(f"Password does not match!")
+            logger.debug("Password does not match!")
             return False
 
         # Remove all old sessions from the user:

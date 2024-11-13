@@ -2,14 +2,13 @@
 
 # Python imports
 import logging
-#import sqlite3
 import sys
 from typing import Optional
 
 # External imports
 import uvicorn
 from fastapi import FastAPI, Request
-from fastapi.responses import RedirectResponse, HTMLResponse
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -26,6 +25,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 main_state = at_state.ATMainState()
 
+
 @app.get("/")
 async def main_page(request: Request):
     maybe_user: Optional[str] = main_state.get_current_user(request)
@@ -36,6 +36,7 @@ async def main_page(request: Request):
         case username:
             return templates.TemplateResponse(name="start.html", context={"username": username})
 
+
 @app.get("/login")
 async def login_get(request: Request):
     maybe_user: Optional[str] = main_state.get_current_user(request)
@@ -43,8 +44,9 @@ async def login_get(request: Request):
     match maybe_user:
         case None:
             return templates.TemplateResponse(name="login.html")
-        case username:
+        case _:
             return RedirectResponse(url="/")
+
 
 @app.post("/login")
 async def login_post(username: str, password: str):
@@ -71,7 +73,7 @@ if __name__ == "__main__":
         global_config.from_file(config_filename)
     else:
         logging.error(f"Got too many command line arguments: {all_args}")
-        raise ValueError(f"Only expected one command line argument: filename of configuration file.")
+        raise ValueError("Only expected one command line argument: filename of configuration file.")
 
     main_state.set_config(global_config)
     main_state.activate()
