@@ -34,7 +34,8 @@ async def main_page(request: Request):
         case None:
             return RedirectResponse(url="/login")
         case username:
-            return templates.TemplateResponse(name="start.html", context={"username": username})
+            return templates.TemplateResponse(name="start.html",
+                context={"request": request, "username": username})
 
 
 @app.get("/login")
@@ -43,17 +44,19 @@ async def login_get(request: Request):
 
     match maybe_user:
         case None:
-            return templates.TemplateResponse(name="login.html")
+            return templates.TemplateResponse(name="login.html",
+                context={"request": request})
         case _:
             return RedirectResponse(url="/")
 
 
 @app.post("/login")
-async def login_post(username: str, password: str):
+async def login_post(request: Request, username: str, password: str):
     if main_state.create_new_session(username, password):
         return RedirectResponse(url="/")
     else:
-        return templates.TemplateResponse(name="login.html", context={"failed_login": True})
+        return templates.TemplateResponse(name="login.html",
+            context={"request": request, "failed_login": True})
 
 if __name__ == "__main__":
     log_format = "%(asctime)s - %(levelname)s - %(name)s - %(message)s"
