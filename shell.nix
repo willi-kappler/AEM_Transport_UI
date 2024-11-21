@@ -7,6 +7,7 @@
         flake8
         ipython
         jinja2
+        python-multipart
         mypy
         uvicorn
         pydantic
