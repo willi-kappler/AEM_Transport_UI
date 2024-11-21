@@ -1,13 +1,12 @@
-.header = {
-    display: flex;
-    justify-content: center;
+#header {
     text-align: center;
     border: 3px solid green;
 }
 
-.login_form = {
+#login_form {
+    border: 3px solid green;
     display: flex;
     justify-content: center;
-    text-align: center;
-    border: 3px solid green;
+    align-items: center;
 }
+
