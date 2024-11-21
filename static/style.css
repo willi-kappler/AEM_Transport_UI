@@ -1,0 +1,13 @@
+.header = {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    border: 3px solid green;
+}
+
+.login_form = {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    border: 3px solid green;
+}
