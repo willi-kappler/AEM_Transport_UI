@@ -20,12 +20,15 @@ logger = logging.getLogger(__name__)
 class ATMainState:
     def __init__(self):
         self.configuration = at_config.ATConfiguration()
+        print("ATMainState init")
 
     def set_config(self, configuration: at_config.ATConfiguration):
         self.configuration = configuration
+        print("Configuration was set")
 
     def activate(self):
         self.db = sqlite3.connect(self.configuration.db_filename)
+        print("Database was loaded")
 
     def get_current_user(self, request: Request) -> Optional[str]:
         cookies: dict[str, str] = request.cookies
