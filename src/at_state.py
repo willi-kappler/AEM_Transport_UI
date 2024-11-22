@@ -16,6 +16,26 @@ import at_config
 
 logger = logging.getLogger(__name__)
 
+AT_SESSION_ID = "AT_f294098d4ca564e6b0c8ccf460e06d80_ID"
+AT_SESSION_MAX_AGE = 60 * 60 * 4 # In seconds, thus 4 hours
+
+def get_session_id(request: Request) -> Optional[str]:
+    cookies: dict[str, str] = request.cookies
+
+    if AT_SESSION_ID not in cookies:
+        logger.debug("No session_id found in cookies.")
+        return None
+
+    session_id: str = cookies[AT_SESSION_ID]
+
+    try:
+        uuid_object = uuid.UUID(session_id, version=4)
+        del uuid_object
+    except Exception:
+        logging.debug(f"Invalid session id (uuid version 4): {session_id}")
+        return None
+
+    return session_id
 
 class ATMainState:
     def __init__(self):
@@ -31,19 +51,9 @@ class ATMainState:
         print("Database was loaded")
 
     def get_current_user(self, request: Request) -> Optional[str]:
-        cookies: dict[str, str] = request.cookies
+        session_id = get_session_id(request)
 
-        if "session_id" not in cookies:
-            logger.debug("No session_id found in cookies.")
-            return None
-
-        session_id: str = cookies["session_id"]
-
-        try:
-            uuid_object = uuid.UUID(session_id, version=4)
-            del uuid_object
-        except Exception:
-            logging.debug(f"Invalid session id (uuid version 4): {session_id}")
+        if session_id is None:
             return None
 
         cursor = self.db.cursor()
@@ -67,9 +77,11 @@ class ATMainState:
 
         # TODO: check for ip or sth. else...
 
+        cursor.close()
+
         return username
 
-    def create_new_session(self, username: str, password: str) -> bool:
+    def create_new_session(self, username: str, password: str) -> Optional[str]:
         logging.debug(f"Create a new session for user: {username}")
 
         cursor = self.db.cursor()
@@ -77,7 +89,7 @@ class ATMainState:
         db_row = db_res.fetchone()
         if db_row is None:
             logger.debug(f"User not found: {username}")
-            return False
+            return None
 
         user_id: str = db_row[0]
         stored_password: str = db_row[1]
@@ -87,7 +99,7 @@ class ATMainState:
         hashed_password = blake2b(password.encode()).hexdigest()
         if hashed_password != stored_password:
             logger.debug("Password does not match!")
-            return False
+            return None
 
         # Remove all old sessions from the user:
         db_res = cursor.execute(f"DELETE FROM sessions WHERE user_id = '{user_id}'")
@@ -95,11 +107,20 @@ class ATMainState:
 
         # Create a new random session id:
         new_session_id: str = uuid.uuid4().hex
-        cursor.execute(f"INSERT INTO sessions VALUES ('{new_session_id}', 'IP_TEST', {user_id})")
+        cursor.execute(f"INSERT INTO sessions (uuid, ip_hash, user_id) VALUES ('{new_session_id}', 'IP_TEST', {user_id})")
 
-        return True
+        self.db.commit()
+        cursor.close()
 
+        return new_session_id
 
+    def logout_user(self, user_id: str):
+        cursor = self.db.cursor()
 
+        # Remove session from the user:
+        db_res = cursor.execute(f"DELETE FROM sessions WHERE user_id = '{user_id}'")
+        logger.debug(f"Removed {db_res.rowcount} session(s).")
 
+        self.db.commit()
+        cursor.close()
 
