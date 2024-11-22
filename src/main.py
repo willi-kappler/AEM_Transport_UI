@@ -99,8 +99,8 @@ async def logout_get(request: Request):
     match maybe_user:
         case None:
             return RedirectResponse(url="/login")
-        case user:
-            main_state.logout_user(user)
+        case username:
+            main_state.logout_user(username)
             response = RedirectResponse(url="/login")
             response.delete_cookie(key=at_state.AT_SESSION_ID)
             return response
