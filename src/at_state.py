@@ -103,7 +103,7 @@ class ATMainState:
 
         # Remove all old sessions from the user:
         db_res = cursor.execute(f"DELETE FROM sessions WHERE user_id = '{user_id}'")
-        logger.debug(f"Removed {db_res.rowcount} old sessions for user {user_id}.")
+        logger.debug(f"Removed {db_res.rowcount} old sessions for user {username}.")
 
         # Create a new random session id:
         new_session_id: str = uuid.uuid4().hex
@@ -114,12 +114,19 @@ class ATMainState:
 
         return new_session_id
 
-    def logout_user(self, user_id: str):
+    def logout_user(self, username: str):
         cursor = self.db.cursor()
 
         # Remove session from the user:
+        db_res = cursor.execute(f"SELECT id FROM users WHERE login = '{username}'")
+        db_row = db_res.fetchone()
+        if db_row is None:
+            logger.debug(f"User not found: {username}")
+            return
+
+        user_id: str = db_row[0]
         db_res = cursor.execute(f"DELETE FROM sessions WHERE user_id = '{user_id}'")
-        logger.debug(f"Removed {db_res.rowcount} session(s) for user {user_id}.")
+        logger.debug(f"Removed {db_res.rowcount} session(s) for user {username}.")
 
         self.db.commit()
         cursor.close()
