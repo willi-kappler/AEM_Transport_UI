@@ -6,8 +6,8 @@
 {% block content %}
 
     <div id="login_form" class="login_form">
-        {% if failed_login %}
-            <h2>Failed login, please retry!</h2>
+        {% if message is defined %}
+            <h2>{{ message }}</h2>
         {% endif %}
 
         <form action="/login" method="post" autocomplete="on">
