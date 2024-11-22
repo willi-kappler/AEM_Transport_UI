@@ -103,7 +103,7 @@ class ATMainState:
 
         # Remove all old sessions from the user:
         db_res = cursor.execute(f"DELETE FROM sessions WHERE user_id = '{user_id}'")
-        logger.debug(f"Removed {db_res.rowcount} old sessions.")
+        logger.debug(f"Removed {db_res.rowcount} old sessions for user {user_id}.")
 
         # Create a new random session id:
         new_session_id: str = uuid.uuid4().hex
@@ -119,7 +119,7 @@ class ATMainState:
 
         # Remove session from the user:
         db_res = cursor.execute(f"DELETE FROM sessions WHERE user_id = '{user_id}'")
-        logger.debug(f"Removed {db_res.rowcount} session(s).")
+        logger.debug(f"Removed {db_res.rowcount} session(s) for user {user_id}.")
 
         self.db.commit()
         cursor.close()
