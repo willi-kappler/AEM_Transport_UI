@@ -5,6 +5,52 @@
     <h2>Welcome {{ username }}, <a href="logout">LOGOUT</a></h2>
 {% endblock %}
 {% block content %}
-    Some stuff
+    <div id="simulation_form">
+        <form action="/run_simulation" method="post" autocomplete="on">
+            <table>
+                <tr>
+                    <td><label for="tool">Tool:</label></td>
+                    <td>
+                        <select id="tool" name="tool">
+                            <option value="circle">Circle</option>
+                            <option value="line">Line</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </td>
+                    <td>
+                        Canvas
+                    </td>
+                </tr>
+                <tr>
+                    <td>Value 1:</td>
+                </tr>
+                <tr>
+                    <td>Value 2:</td>
+                </tr>
+                <tr>
+                    <td>Value 3:</td>
+                </tr>
+                <tr>
+                    <td>Value 4:</td>
+                </tr>
+                <tr>
+                    <td>Value 5:</td>
+                </tr>
+                <tr>
+                    <td>Value 6:</td>
+                </tr>
+                <tr>
+                    <td>Value 7:</td>
+                </tr>
+                <tr>
+                    <td>Value 8:</td>
+                </tr>
+                <tr>
+                    <td><label for="submit">Run the simulation:</label></td>
+                    <td><input type="submit" value="Run" id="submit" name="submit"></td>
+                </tr>
+            </table>
+        </form>
+    </div>
 {% endblock %}
 
