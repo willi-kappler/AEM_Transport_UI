@@ -25,6 +25,10 @@ class Element_Circle {
         this.centery = p1y;
         this.radius = Math.hypot(dx, dy);
     }
+
+    draw() {
+        draw_circle(this.centerx, this.centery, this.radius);
+    }
 }
 
 class Element_Line {
@@ -33,6 +37,10 @@ class Element_Line {
         this.starty = mouse_points[0][1];
         this.endx = mouse_points[1][0];
         this.endy = mouse_points[1][1];
+    }
+
+    draw() {
+
     }
 }
 
@@ -50,7 +58,7 @@ canvas.onmouseup = function(e){
 canvas.onmousemove = function(e){
     //if (!mouse_down) return;
 
-    //mainLayer.trans.x = e.x - dragOffset.x;
+//mainLayer.trans.x = e.x - dragOffset.x;
     //mainLayer.trans.y = e.y - dragOffset.y;
     //return false;
 
@@ -67,6 +75,18 @@ canvas.onmousemove = function(e){
             case TOOL_DELETE:
                 break;
             case TOOL_CIRCLE:
+                if (num_points == 1) {
+                    let p1x = mouse_points[0][0];
+                    let p1y = mouse_points[0][1];
+                    let p2x = e.offsetX;
+                    let p2y = e.offsetY;
+                    let dx = p1x - p2x;
+                    let dy = p1y - p2y;
+                    let radius = Math.hypot(dx, dy)
+
+                    clear_and_redraw();
+                    draw_circle(p1x, p1y, radius);
+                }
                 break;
             case TOOL_LINE:
                 break;
@@ -94,6 +114,7 @@ function mouse_click(e) {
                 let new_circle = new Element_Circle();
                 gfx_elements.push(new_circle);
                 mouse_points.length = 0;
+                clear_and_redraw();
             }
             break;
         case TOOL_LINE:
@@ -104,11 +125,39 @@ function mouse_click(e) {
                 let new_line = new Element_Line();
                 gfx_elements.push(new_line);
                 mouse_points.length = 0;
+                clear_and_redraw();
             }
             break;
         default:
             console.log("Unknown tool: %s", current_tool)
     }
 
+}
+
+function clear_and_redraw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    gfx_elements.forEach(element => {
+        element.draw();
+    });
+}
+
+function draw_circle(p1x, p1y, radius) {
+    ctx.beginPath();
+    // Draw center:
+    ctx.arc(p1x, p1y, 10, 0, 2 * Math.PI);
+    ctx.fillStyle = "red";
+    ctx.fill();
+
+    // Draw outline:
+    ctx.arc(p1x, p1y, radius, 0, 2 * Math.PI);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "black";
+    ctx.stroke();
+
+    // Draw radius handle:
+    ctx.arc(p1x + radius, p1y, 10, 0, 2 * Math.PI);
+    ctx.fillStyle = "red";
+    ctx.fill();
 }
 
