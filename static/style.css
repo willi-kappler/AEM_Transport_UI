@@ -16,7 +16,19 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    flex-direction: column;
+    flex-direction: row;
+}
+
+#input_parameters {
+    padding-right: 50px;
+}
+
+#input_canvas {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    padding-right: 50px;
 }
 
 #draw_canvas {
