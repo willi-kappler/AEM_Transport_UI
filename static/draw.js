@@ -53,6 +53,27 @@ canvas.onmousemove = function(e){
     //mainLayer.trans.x = e.x - dragOffset.x;
     //mainLayer.trans.y = e.y - dragOffset.y;
     //return false;
+
+    num_points = mouse_points.length
+
+    if (mouse_down) {
+        // Used for the move tool
+    } else {
+        switch (current_tool) {
+            case TOOL_NONE:
+                break;
+            case TOOL_MOVE:
+                break;
+            case TOOL_DELETE:
+                break;
+            case TOOL_CIRCLE:
+                break;
+            case TOOL_LINE:
+                break;
+            default:
+                // Nothing to do
+        }
+    }
 }
 
 function mouse_click(e) {
