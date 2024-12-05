@@ -55,7 +55,10 @@ templates = Jinja2Templates(directory="templates")
 @app.get("/")
 @app.post("/")
 async def main_page(request: Request):
-    maybe_user: Optional[str] = main_state.get_current_user(request)
+    # maybe_user: Optional[str] = main_state.get_current_user(request)
+
+    # For debugging:
+    maybe_user = "Debug"
 
     match maybe_user:
         case None:
