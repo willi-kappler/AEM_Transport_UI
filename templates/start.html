@@ -5,61 +5,69 @@
     <h2>Welcome {{ username }}, <a href="logout">LOGOUT</a></h2>
 {% endblock %}
 {% block content %}
+    <script src="static/draw.js" defer></script>
+
     <div id="simulation_form">
-        <form action="/run_simulation" method="post" autocomplete="on">
-            <table>
-                <tr>
-                    <td><label for="tool">Tool:</label></td>
-                    <td>
-                        <select id="tool" name="tool">
-                            <option value="circle">Circle</option>
-                            <option value="line">Line</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </td>
-                </tr>
-                <tr>
-                    <td><label for="alpha_l">Alpha_l:</label></td>
-                    <td><input type="text" id="alpha_l" name="alpha_l"></td>
-                </tr>
-                <tr>
-                    <td><label for="alpha_t">Alpha_t:</label></td>
-                    <td><input type="text" id="alpha_t" name="alpha_t"></td>
-                </tr>
-                <tr>
-                    <td>C0:</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>C1:</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>Ca:</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>Gamma:</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>R:</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>N:</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>M:</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td><label for="submit">Run the simulation:</label></td>
-                    <td><input type="submit" value="Run" id="submit" name="submit"></td>
-                </tr>
-            </table>
-        </form>
+        <div id="input_parameters">
+            <form action="/run_simulation" method="post" autocomplete="on">
+                <table>
+                    <tr>
+                        <td><label for="alpha_l">Alpha_l:</label></td>
+                        <td><input type="text" id="alpha_l" name="alpha_l"></td>
+                    </tr>
+                    <tr>
+                        <td><label for="alpha_t">Alpha_t:</label></td>
+                        <td><input type="text" id="alpha_t" name="alpha_t"></td>
+                    </tr>
+                    <tr>
+                        <td><label for="c0">C0:</label></td>
+                        <td><input type="text" id="c0" name="c0"></td>
+                    </tr>
+                    <tr>
+                        <td><label for="c1">C1:</label></td>
+                        <td><input type="text" id="c1" name="c1"></td>
+                    </tr>
+                    <tr>
+                        <td><label for="ca">Ca:</label></td>
+                        <td><input type="text" id="ca" name="ca"></td>
+                    </tr>
+                    <tr>
+                        <td><label for="gamma">Gamma:</label></td>
+                        <td><input type="text" id="gamma" name="gamma"></td>
+                    </tr>
+                    <tr>
+                        <td><label for="r">R:</label></td>
+                        <td><input type="text" id="r" name="r"></td>
+                    </tr>
+                    <tr>
+                        <!-- Number of terms - 1 -->
+                        <td><label for="terms_n">N:</label></td>
+                        <td><input type="text" id="terms_n" name="terms_n"></td>
+                    </tr>
+                    <tr>
+                        <!-- Number of controll points -->
+                        <td><label for="controll_m">M:</label></td>
+                        <td><input type="text" id="controll_m" name="controll_m"></td>
+                    </tr>
+                    <tr>
+                        <td><label for="solver">Solver:</label></td>
+                        <td>
+                            <select id="solver" name="solver">
+                                <option value="least_squares">Least Squares</option>
+                                <option value="gauss_seidel">Gauss Seidel</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><label for="submit">Run the simulation:</label></td>
+                        <td><input type="submit" value="Run" id="submit" name="submit"></td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+        <div id="input_canvas">
+             <canvas id="draw_canvas" width="600" height="600"></canvas>
+        </div>
     </div>
 {% endblock %}
 
