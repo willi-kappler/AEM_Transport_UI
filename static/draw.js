@@ -1,6 +1,9 @@
 const TOOL_NONE = 0;
 const TOOL_MOVE = 1;
 const TOOL_DELETE = 2;
+const TOOL_ZOOM_IN = 3;
+const TOOL_ZOOM_OUT = 4;
+const TOOL_PAN = 5;
 const TOOL_CIRCLE = 10;
 const TOOL_LINE = 11;
 
@@ -19,71 +22,80 @@ const btn_clear = document.getElementById("btn_clear");
 const btn_delete = document.getElementById("btn_delete");
 const btn_move = document.getElementById("btn_move");
 const btn_undo = document.getElementById("btn_undo");
+const btn_zoom_in = document.getElementById("btn_zoom_in");
+const btn_zoom_out = document.getElementById("btn_zoom_out");
+const btn_pan = document.getElementById("btn_pan");
 const btn_circle = document.getElementById("btn_circle");
 const btn_line = document.getElementById("btn_line");
 
 btn_clear.onclick = function() {
     fill_undo_buffer();
     gfx_elements.length = 0;
-    mouse_points.length = 0;
-    mouse_down = false;
-    current_tool = TOOL_NONE;
+    change_tool(TOOL_NONE);
     clear_and_redraw();
 }
 
 btn_delete.onclick = function() {
-    mouse_points.length = 0;
-    mouse_down = false;
-    current_tool = TOOL_DELETE;
+    change_tool(TOOL_DELETE);
 }
 
 btn_move.onclick = function() {
-    mouse_points.length = 0;
-    mouse_down = false;
-    current_tool = TOOL_MOVE;
+    change_tool(TOOL_MOVE);
 }
 
 btn_undo.onclick = function() {
     if (gfx_undo_buffer.length > 0) {
-        mouse_points.length = 0;
-        mouse_down = false;
-        current_tool = TOOL_NONE;
+        change_tool(TOOL_NONE);
 
         let prev_elements = gfx_undo_buffer.pop();
         gfx_elements.length = 0;
         prev_elements.forEach(element => {
             // Clone each gfx element individually
-            e_cloned = { ...element };
-            gfx_elements.push(e_cloned);
+            gfx_elements.push(element.clone());
         });
         clear_and_redraw();
     }
 }
 
+btn_zoom_in.onclick = function() {
+    change_tool(TOOL_ZOOM_IN);
+}
+
+btn_zoom_out.onclick = function() {
+    change_tool(TOOL_ZOOM_OUT);
+}
+
+btn_pan.onclick = function() {
+    change_tool(TOOL_PAN);
+}
+
 btn_circle.onclick = function() {
-    mouse_points.length = 0;
-    mouse_down = false;
-    current_tool = TOOL_CIRCLE;
+    change_tool(TOOL_CIRCLE);
 }
 
 btn_line.onclick = function() {
-    mouse_points.length = 0;
-    mouse_down = false;
-    current_tool = TOOL_LINE;
+    change_tool(TOOL_LINE);
 }
 
 class Element_Circle {
     constructor() {
-        let p1x = mouse_points[0][0];
-        let p1y = mouse_points[0][1];
-        let p2x = mouse_points[1][0];
-        let p2y = mouse_points[1][1];
-        let dx = p1x - p2x;
-        let dy = p1y - p2y;
+        if (mouse_points.length > 0) {
+            let p1x = mouse_points[0][0];
+            let p1y = mouse_points[0][1];
+            let p2x = mouse_points[1][0];
+            let p2y = mouse_points[1][1];
+            let dx = p1x - p2x;
+            let dy = p1y - p2y;
 
-        this.centerx = p1x;
-        this.centery = p1y;
-        this.radius = Math.hypot(dx, dy);
+            this.centerx = p1x;
+            this.centery = p1y;
+            this.radius = Math.hypot(dx, dy);
+        } else {
+            // Use default values:
+            this.centerx = 0.0;
+            this.centery = 0.0;
+            this.radius = 0.0;
+        }
     }
 
     draw() {
@@ -109,14 +121,31 @@ class Element_Circle {
 
         return d <= handle_size;
     }
+
+    clone() {
+        let result = new Element_Circle();
+        result.centerx = this.centerx;
+        result.centery = this.centery;
+        result.radius = this.radius;
+
+        return result;
+    }
 }
 
 class Element_Line {
     constructor() {
-        this.p1x = mouse_points[0][0];
-        this.p1y = mouse_points[0][1];
-        this.p2x = mouse_points[1][0];
-        this.p2y = mouse_points[1][1];
+        if (mouse_points.length > 0) {
+            this.p1x = mouse_points[0][0];
+            this.p1y = mouse_points[0][1];
+            this.p2x = mouse_points[1][0];
+            this.p2y = mouse_points[1][1];
+        } else {
+            // Use default values:
+            this.p1x = 0.0;
+            this.p1y = 0.0;
+            this.p2x = 0.0;
+            this.p2y = 0.0;
+        }
     }
 
     draw() {
@@ -141,6 +170,16 @@ class Element_Line {
         let d = Math.hypot(dx, dy);
 
         return d <= handle_size;
+    }
+
+    clone() {
+        let result = new Element_Line();
+        result.p1x = this.p1x;
+        result.p1y = this.p1y;
+        result.p2x = this.p2x;
+        result.p2y = this.p2y;
+
+        return result;
     }
 }
 
@@ -200,8 +239,9 @@ function mouse_click(e) {
             let del_index = -1
             let p1x = e.offsetX;
             let p1y = e.offsetY;
+            let num_elems = gfx_elements.length;
 
-            for (let i = 0; i < gfx_elements; i++) {
+            for (let i = 0; i < num_elems; i++) {
                 if (gfx_elements[i].mouse_contact(p1x, p1y)) {
                     del_index = i;
                     break;
@@ -209,8 +249,10 @@ function mouse_click(e) {
             }
 
             if (del_index >= 0) {
+                fill_undo_buffer();
                 gfx_elements.splice(del_index, 1);
                 clear_and_redraw();
+                change_tool(TOOL_NONE);
             }
 
             break;
@@ -240,6 +282,54 @@ function mouse_click(e) {
             break;
     }
 
+}
+
+function change_tool(tool) {
+    mouse_points.length = 0;
+    mouse_down = false;
+
+    switch (current_tool) {
+        case TOOL_MOVE:
+            btn_move.classList.toggle("active");
+        break;
+        case TOOL_DELETE:
+            btn_delete.classList.toggle("active");
+        break;
+        case TOOL_PAN:
+            btn_pan.classList.toggle("active");
+        break;
+        case TOOL_CIRCLE:
+            btn_circle.classList.toggle("active");
+        break;
+        case TOOL_LINE:
+            btn_line.classList.toggle("active");
+        break;
+    }
+
+    if (tool == current_tool) {
+        current_tool = TOOL_NONE;
+        return
+    }
+
+    current_tool = tool;
+
+    switch (current_tool) {
+        case TOOL_MOVE:
+            btn_move.classList.toggle("active");
+        break;
+        case TOOL_DELETE:
+            btn_delete.classList.toggle("active");
+        break;
+        case TOOL_PAN:
+            btn_pan.classList.toggle("active");
+        break;
+        case TOOL_CIRCLE:
+            btn_circle.classList.toggle("active");
+        break;
+        case TOOL_LINE:
+            btn_line.classList.toggle("active");
+        break;
+    }
 }
 
 function fill_undo_buffer() {
