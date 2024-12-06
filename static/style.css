@@ -23,11 +23,19 @@
     padding-right: 50px;
 }
 
-#input_canvas {
+#input_tools {
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: row;
+}
+
+#canvas_section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding-right: 50px;
 }
 
 #draw_canvas {
