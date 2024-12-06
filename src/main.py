@@ -118,7 +118,7 @@ if __name__ == "__main__":
     logging.getLogger("asyncio").setLevel(logging.WARNING)
     logging.getLogger("multipart").setLevel(logging.WARNING)
 
-    uv_config = uvicorn.Config("main:app", port=5000, log_level="debug")
+    uv_config = uvicorn.Config("main:app", port=5000, log_level="debug", host="0.0.0.0")
     server = uvicorn.Server(uv_config)
     server.run()
 
