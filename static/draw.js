@@ -10,6 +10,7 @@ const TOOL_LINE = 11;
 const canvas = document.getElementById("draw_canvas");
 const ctx = canvas.getContext("2d");
 const handle_size = 5;
+const cursor_info = document.getElementById("cursor_info");
 
 var mouse_down = false;
 var current_tool = TOOL_NONE
@@ -18,6 +19,8 @@ const mouse_points = [];
 const gfx_undo_buffer = [];
 
 // Buttons:
+const btn_submit = document.getElementById("run_sim");
+
 const btn_clear = document.getElementById("btn_clear");
 const btn_delete = document.getElementById("btn_delete");
 const btn_move = document.getElementById("btn_move");
@@ -27,6 +30,28 @@ const btn_zoom_out = document.getElementById("btn_zoom_out");
 const btn_pan = document.getElementById("btn_pan");
 const btn_circle = document.getElementById("btn_circle");
 const btn_line = document.getElementById("btn_line");
+
+btn_submit.onclick = function() {
+    // document.forms['myform'].submit();
+    let json_output = {
+        d_width: document.getElementById("d_width").value,
+        d_height: document.getElementById("d_height").value,
+        alpha_l: document.getElementById("alpha_l").value,
+        alpha_t: document.getElementById("alpha_t").value,
+        c0: document.getElementById("c0").value,
+        c1: document.getElementById("c1").value,
+        ca: document.getElementById("ca").value,
+        gamma: document.getElementById("gamma").value,
+        r_val: document.getElementById("r_val").value,
+        terms_n: document.getElementById("terms_n").value,
+        controll_m: document.getElementById("controll_m").value,
+        solver: document.getElementById("solver").value,
+        elements: gfx_elements
+    };
+
+    let json_window = window.open("", "JSON output", "width=600,height=600");
+    json_window.document.write(JSON.stringify(json_output, null, 2));
+}
 
 btn_clear.onclick = function() {
     fill_undo_buffer();
@@ -195,6 +220,26 @@ canvas.onmouseup = function(e) {
 canvas.onmousemove = function(e) {
     num_points = mouse_points.length
 
+    let p1x = 0.0;
+    let p1y = 0.0;
+    let p2x = e.offsetX;
+    let p2y = e.offsetY;
+    let dx = 0.0;
+    let dy = 0.0;
+    let radius = Math.hypot(dx, dy)
+
+    if (num_points == 0) {
+        cursor_info.innerText = `x: ${p2x}, y: ${p2y}, r: 0.0`;
+    } else if (num_points == 1) {
+        p1x = mouse_points[0][0];
+        p1y = mouse_points[0][1];
+        dx = p1x - p2x;
+        dy = p1y - p2y;
+        radius = Math.hypot(dx, dy)
+
+        cursor_info.innerText = `x: ${p2x}, y: ${p2y}, r: ${radius.toFixed(2)}`;
+    }
+
     if (mouse_down) {
         // Used for the move tool
         if (current_tool == TOOL_MOVE) {
@@ -204,25 +249,12 @@ canvas.onmousemove = function(e) {
         switch (current_tool) {
             case TOOL_CIRCLE:
                 if (num_points == 1) {
-                    let p1x = mouse_points[0][0];
-                    let p1y = mouse_points[0][1];
-                    let p2x = e.offsetX;
-                    let p2y = e.offsetY;
-                    let dx = p1x - p2x;
-                    let dy = p1y - p2y;
-                    let radius = Math.hypot(dx, dy)
-
                     clear_and_redraw();
                     draw_circle(p1x, p1y, radius);
                 }
                 break;
             case TOOL_LINE:
                 if (num_points == 1) {
-                    let p1x = mouse_points[0][0];
-                    let p1y = mouse_points[0][1];
-                    let p2x = e.offsetX;
-                    let p2y = e.offsetY;
-
                     clear_and_redraw();
                     draw_line(p1x, p1y, p2x, p2y);
                 }
