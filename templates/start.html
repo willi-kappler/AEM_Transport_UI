@@ -44,8 +44,8 @@
                         <td><input type="number" id="gamma" name="gamma" value="3.5"></td>
                     </tr>
                     <tr>
-                        <td><label for="r">R:</label></td>
-                        <td><input type="number" id="r" name="r" value="1"></td>
+                        <td><label for="r_val">R:</label></td>
+                        <td><input type="number" id="r_val" name="r_val" value="1"></td>
                     </tr>
                     <tr>
                         <!-- Number of terms - 1 -->
@@ -67,14 +67,17 @@
                         </td>
                     </tr>
                     <tr>
-                        <td><label for="submit">Run the simulation:</label></td>
-                        <td><input type="submit" value="Run" id="submit" name="submit"></td>
+                        <td><label for="run_sim">Run the simulation:</label></td>
+                        <td><input type="button" value="Run" id="run_sim" name="run_sim"></td>
                     </tr>
                 </table>
             </form>
         </div>
-        <div id="input_canvas">
-            <canvas id="draw_canvas" width="600" height="600"></canvas>
+        <div id="input_tools">
+            <div id="canvas_section">
+                <canvas id="draw_canvas" width="600" height="600"></canvas>
+                <p id="cursor_info">x: 0.0, y: 0.0, r: 0.0</p>
+            </div>
             <table>
                 <tr><td><button id="btn_clear">Clear all</button></td><tr>
                 <tr><td><button id="btn_delete">Delete element</button></td><tr>
