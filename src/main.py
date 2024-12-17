@@ -33,6 +33,7 @@ def main_page():
                 ui.menu_item("Add line")
                 ui.menu_item("Add circle")
                 ui.separator()
+                ui.menu_item("Move element")
                 ui.menu_item("Edit element")
                 ui.menu_item("Delete element")
 
@@ -75,7 +76,7 @@ def main_page():
                 ui.menu_item("Model manual...")
                 ui.menu_item("About...")
 
-    ui.interactive_image(size=(1000, 1000), cross=True).classes("size-[800px] bg-blue-50")
+    ui.interactive_image(size=(1000, 1000), cross=True).classes("size-[800px] bg-blue-100")
 
     with ui.footer():
         ui.label("AEM Transport")
@@ -95,5 +96,7 @@ def login_page():
         ui.input(label="Password")
         ui.button("Login", icon="login", on_click=check_login).classes("rounded-lg")
 
-ui.run()
+
+if __name__ in {"__main__", "__mp_main__"}:
+    ui.run()
 
