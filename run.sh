@@ -1,4 +1,3 @@
 #!/usr/bin/env bash
 
-python3 src/main.py
-
+uv run src/main.py
