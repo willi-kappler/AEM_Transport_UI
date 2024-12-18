@@ -3,11 +3,19 @@
 # External imports
 from nicegui import ui
 
-
+# Local imports
+import at_state
 
 class ATMainUI:
-    def __init__(self):
-        pass
+    def __init__(self, username: str, main_state: at_state.ATMainState):
+        self.username: str = username
+        self.main_state = main_state
+
+        with ui.dialog() as logout_dialog:
+            with ui.card():
+                ui.label("Logged out sucessfully!").classes("text-2xl")
+
+        self.logout_dialog = logout_dialog
 
     def show(self):
         with ui.header():
@@ -19,7 +27,7 @@ class ATMainUI:
                     ui.menu_item("Save CSV...")
                     ui.menu_item("Save JSON...")
                     ui.separator()
-                    ui.menu_item("Log out")
+                    ui.menu_item("Log out", self.logout)
 
             with ui.button("Edit").props("no-caps"):
                 with ui.menu():
@@ -81,9 +89,17 @@ class ATMainUI:
                     ui.menu_item("Model manual...")
                     ui.menu_item("About...")
 
+            ui.space()
+            ui.label(f"{self.username}")
+
         ui.interactive_image(size=(1000, 1000), cross=True).classes("size-[800px] bg-blue-100")
 
         with ui.footer():
             ui.label("AEM Transport")
+
+    async def logout(self):
+        self.main_state.logout_user(self.username)
+        await self.logout_dialog
+        ui.navigate.to("/login")
 
 
