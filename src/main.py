@@ -24,11 +24,11 @@ def main_page():
 
     match maybe_user:
         case None:
-            # Not logged in, show login ui:
+            # Not logged in, redirect to /login:
             ui.navigate.to("/login")
-        case _:
-            # Already logged in, redirect to main:
-            main_ui = at_main.ATMainUI()
+        case username:
+            # Already logged in, show main ui:
+            main_ui = at_main.ATMainUI(username, main_state)
             main_ui.show()
 
 @ui.page("/login", title="AEM - Login")
@@ -45,6 +45,18 @@ def login_page():
             # Already logged in, redirect to main:
             ui.navigate.to("/main")
 
+@ui.page("/", title="AEM")
+def root_page():
+    browser_id: str = app.storage.browser["id"]
+    maybe_user: Optional[str]  = main_state.get_current_user(browser_id)
+
+    match maybe_user:
+        case None:
+            # Not logged in, redirect to /login:
+            ui.navigate.to("/login")
+        case _:
+            # Already logged in, redirect to /main:
+            ui.navigate.to("/main")
 
 if __name__ in {"__main__", "__mp_main__"}:
     global main_state
@@ -75,5 +87,5 @@ if __name__ in {"__main__", "__mp_main__"}:
     main_state.set_config(global_config)
     main_state.activate()
 
-    ui.run(storage_secret=global_config.secret)
+    ui.run(storage_secret=global_config.secret, show=False, reload=False)
 
