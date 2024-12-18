@@ -1,102 +1,79 @@
-from nicegui import ui
 
 
-@ui.page("/main")
+# Python imports
+import logging
+import sys
+from typing import Optional
+
+# External imports
+from nicegui import app, ui
+
+# Local imports
+import at_config
+import at_state
+import at_login
+import at_main
+
+
+logger = logging.getLogger(__name__)
+
+@ui.page("/main", title="AEM - Main")
 def main_page():
-    ui.page_title('AEM Transport - Main')
+    browser_id: str = app.storage.browser["id"]
+    maybe_user: Optional[str]  = main_state.get_current_user(browser_id)
 
-    with ui.header():
-        with ui.button("File").props("no-caps"):
-            with ui.menu():
-                ui.menu_item("Load CSV...")
-                ui.menu_item("Load JSON...")
-                ui.separator()
-                ui.menu_item("Save CSV...")
-                ui.menu_item("Save JSON...")
-                ui.separator()
-                ui.menu_item("Log out")
+    match maybe_user:
+        case None:
+            # Not logged in, show login ui:
+            ui.navigate.to("/login")
+        case _:
+            # Already logged in, redirect to main:
+            main_ui = at_main.ATMainUI()
+            main_ui.show()
 
-        with ui.button("Edit").props("no-caps"):
-            with ui.menu():
-                ui.menu_item("Undo")
-                ui.menu_item("Redo")
-                ui.separator()
-                ui.menu_item("Cut")
-                ui.menu_item("Copy")
-                ui.menu_item("Paste")
-                ui.separator()
-                ui.menu_item("Clear all")
-
-        with ui.button("Tool").props("no-caps"):
-            with ui.menu():
-                ui.menu_item("Add point")
-                ui.menu_item("Add line")
-                ui.menu_item("Add circle")
-                ui.separator()
-                ui.menu_item("Move element")
-                ui.menu_item("Edit element")
-                ui.menu_item("Delete element")
-
-        with ui.button("View").props("no-caps"):
-            with ui.menu():
-                ui.menu_item("Zoom 100%")
-                ui.menu_item("Zoom in")
-                ui.menu_item("Zoom out")
-                ui.separator()
-                ui.menu_item("Move / Pan")
-
-        with ui.button("Model").props("no-caps"):
-            with ui.menu():
-                ui.menu_item("AEM flow")
-                ui.menu_item("AEM transport...")
-                ui.menu_item("Run model")
-
-        with ui.button("Data").props("no-caps"):
-            with ui.menu():
-                ui.menu_item("Domain extent...")
-                ui.menu_item("Aquifier properties...")
-                ui.menu_item("Chemical parameters...")
-
-        with ui.button("Solver").props("no-caps"):
-            with ui.menu():
-                ui.menu_item("Least squares")
-                ui.menu_item("Gauss-Seidel...")
-                ui.menu_item("Order of functions (N)...")
-                ui.menu_item("Num. of controll points (M)...")
-
-        with ui.button("Post processing").props("no-caps"):
-            with ui.menu():
-                ui.menu_item("Download result...")
-                ui.menu_item("Plots...")
-                ui.menu_item("Statistical parameters...")
-
-        with ui.button("Help").props("no-caps"):
-            with ui.menu():
-                ui.menu_item("Navigation...")
-                ui.menu_item("Model manual...")
-                ui.menu_item("About...")
-
-    ui.interactive_image(size=(1000, 1000), cross=True).classes("size-[800px] bg-blue-100")
-
-    with ui.footer():
-        ui.label("AEM Transport")
-
-
-@ui.page("/")
+@ui.page("/login", title="AEM - Login")
 def login_page():
-    ui.page_title('AEM Transport - Login')
+    browser_id: str = app.storage.browser["id"]
+    maybe_user: Optional[str]  = main_state.get_current_user(browser_id)
 
-    def check_login() -> None:
-        ui.navigate.to("/main")
-
-    with ui.card().classes("absolute-center items-center"):
-        ui.label("AEM Transport").classes("text-2xl font-bold")
-        ui.label("Please log in first:").classes("text-xl")
-        ui.input(label="Login ID")
-        ui.input(label="Password")
-        ui.button("Login", icon="login", on_click=check_login).classes("rounded-lg")
+    match maybe_user:
+        case None:
+            # Not logged in, show login ui:
+            login_ui = at_login.ATLoginUI(main_state)
+            login_ui.show()
+        case _:
+            # Already logged in, redirect to main:
+            ui.navigate.to("/main")
 
 
 if __name__ in {"__main__", "__mp_main__"}:
-    ui.run()
+    global main_state
+
+    log_format = "%(asctime)s - %(levelname)s - %(name)s - %(message)s"
+    log_file_name = "server.log"
+    logging.basicConfig(filename=log_file_name, level=logging.DEBUG, format=log_format)
+
+    # Silence loggers from other modules:
+    logging.getLogger("asyncio").setLevel(logging.WARNING)
+    logging.getLogger("multipart").setLevel(logging.WARNING)
+
+    all_args = sys.argv
+    num_of_args = len(all_args)
+
+    global_config = at_config.ATConfiguration()
+
+    if num_of_args == 1:
+        logging.info("Using defualt configuration.")
+    elif num_of_args == 2:
+        config_filename = all_args[1]
+        global_config.from_file(config_filename)
+    else:
+        logging.error(f"Got too many command line arguments: {all_args}")
+        raise ValueError("Only expected one command line argument: filename of configuration file.")
+
+    main_state = at_state.ATMainState()
+    main_state.set_config(global_config)
+    main_state.activate()
+
+    ui.run(storage_secret=global_config.secret)
 
