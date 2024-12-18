@@ -1,15 +1,15 @@
 # TODO:
 
-- Mouse over handle
-- Undo
-- Default values for parameters
-
+- Application state with all settings and objects
+- Finish all dialog boxes
 
 # Documentation:
 
-https://fastapi.tiangolo.com/bn/advanced/templates/
-https://jinja.palletsprojects.com/en/stable/templates/
+https://nicegui.io/documentation
 
+https://tailwindcss.com/docs/utility-first
+
+https://quasar.dev/docs
 
 
 
