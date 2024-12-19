@@ -1,7 +1,6 @@
 
 # Python imports
 import logging
-import enum
 
 # External imports
 from nicegui import app, ui
@@ -9,13 +8,10 @@ from nicegui import app, ui
 # Local imports
 import at_state
 import at_canvas
+import at_model_settings
+import at_dialogs
 
 logger = logging.getLogger(__name__)
-
-class ATModelType(enum.Enum):
-    AEM_Flow = 0
-    AEM_Transport_horizontal = 1
-    AEM_Transport_vertical = 2
 
 
 class ATMainUI:
@@ -23,55 +19,9 @@ class ATMainUI:
         self.username: str = username
         self.main_state = main_state
         self.canvas = at_canvas.ATCanvas()
-        self.aem_model_type = ATModelType.AEM_Flow
-        self.domain_extend = (0.0, 0.0, 100.0, 100.0)
+        self.model_settings = at_model_settings.ATModelSettings()
 
         # TODO: get state and settings from browser via app.storage
-
-        # File menu:
-        with ui.dialog() as self.logout_dialog:
-            with ui.card():
-                ui.label("Logged out sucessfully!").classes("text-2xl")
-
-        # Model menu:
-        with ui.dialog() as self.aem_transport_dialog:
-            with ui.card():
-                def set_variant(element):
-                    self.aem_transport_dialog.close()
-                    v = element.value
-                    match v:
-                        case "horizontal":
-                            self.aem_model_type = ATModelType.AEM_Transport_horizontal
-                            self.status_bar.set_text("AEM model is now of type transport horizontal")
-                        case "vertical":
-                            self.aem_model_type = ATModelType.AEM_Transport_vertical
-                            self.status_bar.set_text("AEM model is now of type transport vertical")
-
-                ui.label("Select AEM transport variant:").classes("text-1xl")
-                ui.select(["horizontal", "vertical"], on_change=set_variant, value="horizontal")
-
-        # Data menu:
-        with ui.dialog() as self.domain_extend_dialog:
-            with ui.card():
-                def set_values():
-                    self.domain_extend_dialog.close()
-                    self.domain_extend = (x_min.value, y_min.value, x_max.value, y_max.value)
-                    self.status_bar.set_text(f"New domain extend: {self.domain_extend}")
-
-                ui.label("Set domain extend:").classes("text-1xl")
-                x_min = ui.number("x min", value=self.domain_extend[0], step=10.0)
-                y_min = ui.number("y min", value=self.domain_extend[1], step=10.0)
-                x_max = ui.number("x max", value=self.domain_extend[2], step=10.0)
-                y_max = ui.number("y max", value=self.domain_extend[3], step=10.0)
-                ui.button("OK", on_click=set_values)
-
-        # Help menu:
-        with ui.dialog() as self.about_dialog:
-            with ui.card():
-                ui.label("Supervisor: Prabhas Yadav").classes("text-1xl")
-                ui.label("Simulation: Anton Köhler").classes("text-1xl")
-                ui.label("GUI: Willi Kappler").classes("text-1xl")
-
 
     def show(self):
         with ui.header():
@@ -155,6 +105,23 @@ class ATMainUI:
         with ui.footer():
             self.status_bar = ui.label("Welcome to AEM Transport")
 
+        # Set up all dialogs and show them only when needed:
+
+        # File menu:
+        self.logout_dialog = at_dialogs.ATLogoutDialog()
+
+        # Model menu:
+        self.aem_transport_dialog = at_dialogs.ATTransportDialog(self.model_settings, self.status_bar)
+
+        # Data menu:
+        self.domain_extend_dialog = at_dialogs.ATDomainExtendDialog(self.model_settings, self.status_bar)
+        self.aquifier_props_dialog = at_dialogs.ATAquifierPropsDialog(self.model_settings, self.status_bar)
+        self.chemical_parameters1_dialog = at_dialogs.ATChemicalParametersDialog1()
+        self.chemical_parameters2_dialog = at_dialogs.ATChemicalParametersDialog2(self.model_settings, self.status_bar)
+
+        # Help menu:
+        self.about_dialog = at_dialogs.ATAboutDialog()
+
     # File menu:
     def file_load_csv(self):
         pass
@@ -226,7 +193,7 @@ class ATMainUI:
 
     # Model menu:
     def model_aem_flow(self):
-        self.aem_model_type = ATModelType.AEM_Flow
+        self.model_settings.set_aem_flow()
         self.status_bar.set_text("AEM model is now of type flow")
 
     def model_aem_transport(self):
@@ -240,10 +207,13 @@ class ATMainUI:
         self.domain_extend_dialog.open()
 
     def data_aquifier(self):
-        pass
+        self.aquifier_props_dialog.open()
 
     def data_chemical(self):
-        pass
+        if self.model_settings.is_aem_flow():
+            self.chemical_parameters1_dialog.open()
+        else:
+            self.chemical_parameters2_dialog.open()
 
     # Solver menu:
     def solver_least_squares(self):
