@@ -11,6 +11,8 @@ https://tailwindcss.com/docs/utility-first
 
 https://quasar.dev/docs
 
+https://fonts.google.com/icons
+
 
 
 
