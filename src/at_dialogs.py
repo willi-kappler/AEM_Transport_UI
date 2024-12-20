@@ -60,21 +60,21 @@ class ATDomainExtendDialog(ui.dialog):
                 ui.button("OK", on_click=self.set_domain)
 
     def set_domain(self):
+        self.close()
+
         x_min = self.x_min.value
         y_min = self.y_min.value
         x_max = self.x_max.value
         y_max = self.y_max.value
-        print("set_domain 1")
-        self.close()
-        print("set_domain 2")
-        print(f"New domain: {x_min=}, {y_min=}, {x_max=}, {y_max=}")
+
         self.status_bar.set_text(f"New domain extend: x_min: {x_min}, y_min: {y_min}, x_max: {x_max}, y_max: {y_max}")
-        print("set_domain 3")
-        # TODO: There is a bug somewhere here...
-        self.model_settings.dfgdsfgtgtgh()
-        self.model_settings.set_domain_extend()
-        self.model_settings.set_domain_extend(x_min, y_min, x_max, y_max)
-        print("set_domain 4")
+
+        self.model_settings.domain_x_min = x_min
+        self.model_settings.domain_y_min = y_min
+        self.model_settings.domain_x_max = x_max
+        self.model_settings.domain_y_max = y_max
+
+        print(f"New domain: {x_min=}, {y_min=}, {x_max=}, {y_max=}")
 
     def open(self):
         (x_min, y_min, x_max, y_max) = self.model_settings.get_domain_extend()
