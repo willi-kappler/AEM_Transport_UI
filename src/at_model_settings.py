@@ -44,13 +44,6 @@ class ATModelSettings:
     def is_aem_flow(self) -> bool:
         return self.aem_model_type == ATModelType.AEM_Flow
 
-    def set_domain_extent(self, x_min: float, y_min: float, x_max: float, y_max: float):
-        print(f"New domain: {x_min=}, {y_min=}, {x_max=}, {y_max=}")
-        self.domain_x_min = x_min
-        self.domain_y_min = y_min
-        self.domain_x_max = x_max
-        self.domain_y_max = y_max
-
     def get_domain_extend(self) -> tuple[float, float, float, float]:
         return (self.domain_x_min, self.domain_y_min, self.domain_x_max, self.domain_y_max)
 
