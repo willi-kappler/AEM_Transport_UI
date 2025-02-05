@@ -2,7 +2,7 @@
 version = "0.1"
 name = "AEMTransportUI"
 dependencies = [
-    "nicegui >= 2.9"
+    "nicegui >= 2.11"
 ]
 requires-python = ">= 3.12"
 readme = "README.md"
