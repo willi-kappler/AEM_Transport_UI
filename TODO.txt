@@ -15,6 +15,7 @@ https://fonts.google.com/icons
 
 
 Use "uv sync" to update the environment.
+On NixOS use "programs.nix-ld.enable = true;" in configuration.nix
 
 
 # SQLite3 tables:
